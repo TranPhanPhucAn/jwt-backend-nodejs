@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 require("dotenv").config();
 import connection from "./config/connectDB";
 import configCors from "./config/cors";
+import { createJWT, verifyToken } from "./middleware/JWTAction";
 const app = express();
 const PORT = process.env.PORT || 8080;
 //config cors
@@ -15,9 +16,8 @@ configViewEngine(app);
 //config body-parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 //test connection DB
-connection();
+// connection();
 //init web route
 initWebRoutes(app);
 initApiRoutes(app);
