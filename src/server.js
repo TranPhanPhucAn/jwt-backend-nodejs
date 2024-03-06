@@ -6,7 +6,7 @@ import bodyParser from "body-parser";
 require("dotenv").config();
 import connection from "./config/connectDB";
 import configCors from "./config/cors";
-import { createJWT, verifyToken } from "./middleware/JWTAction";
+import cookieParser from "cookie-parser";
 const app = express();
 const PORT = process.env.PORT || 8080;
 //config cors
@@ -18,9 +18,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 //test connection DB
 // connection();
+//config cookies parser
+app.use(cookieParser());
+
 //init web route
 initWebRoutes(app);
 initApiRoutes(app);
+app.use((req, res) => {
+  return res.send("404 not found");
+});
 app.listen(PORT, () => {
   console.log("Listening on PORT=", PORT);
 });

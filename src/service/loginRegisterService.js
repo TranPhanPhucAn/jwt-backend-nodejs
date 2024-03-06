@@ -89,9 +89,19 @@ const handleUserLogin = async (rawData) => {
         return {
           EM: "Ok",
           EC: 0,
-          DT: { access_token: token, groupWithRoles },
+          DT: {
+            access_token: token,
+            groupWithRoles,
+            email: user.email,
+            username: user.username,
+          },
         };
       } else {
+        return {
+          EM: "Your email/phone or password is incorrect!",
+          EC: 1,
+          DT: "",
+        };
       }
     }
     return {
