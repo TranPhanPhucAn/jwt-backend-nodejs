@@ -9,9 +9,12 @@ const configCors = (app) => {
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "X-Request-With, content-type"
+      "X-Request-With, content-type, Authorization"
     );
     res.setHeader("Access-Control-Allow-Credentials", true);
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+    }
     next();
   });
 };

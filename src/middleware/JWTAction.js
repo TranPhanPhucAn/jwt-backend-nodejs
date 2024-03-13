@@ -1,11 +1,13 @@
 require("dotenv").config();
 import jwt from "jsonwebtoken";
-const nonSecurePaths = ["/", "/login", "register"];
+require("dotenv").config();
+
+const nonSecurePaths = ["/", "/login", "/register", "/logout"];
 const createJWT = (payload) => {
   let key = process.env.JWT_SECRET;
   let token = null;
   try {
-    token = jwt.sign(payload, key);
+    token = jwt.sign(payload, key, { expiresIn: process.env.JWT_EXPIRES_IN });
   } catch (err) {
     console.log(err);
   }
@@ -21,16 +23,28 @@ const verifyToken = (token) => {
   }
   return decoded;
 };
+const extractToken = (req) => {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.split(" ")[0] === "Bearer"
+  ) {
+    return req.headers.authorization.split(" ")[1];
+  }
+  return null;
+};
 const checkUserJWT = (req, res, next) => {
   if (nonSecurePaths.includes(req.path)) return next();
   let cookies = req.cookies;
-  if (cookies && cookies.jwt) {
-    let token = cookies.jwt;
+  let tokenFromHeader = extractToken(req);
+  if ((cookies && cookies.jwt) || tokenFromHeader) {
+    let token = cookies && cookies.jwt ? cookies.jwt : tokenFromHeader;
     let decoded = verifyToken(token);
     if (decoded) {
       req.user = decoded;
+      req.token = token;
       next();
     } else {
+      console.log("1dfdfdfds");
       return res.status(401).json({
         EC: -1,
         DT: "",
@@ -38,6 +52,8 @@ const checkUserJWT = (req, res, next) => {
       });
     }
   } else {
+    console.log("2dfdfdfds");
+
     return res.status(401).json({
       EC: -1,
       DT: "",
@@ -46,7 +62,8 @@ const checkUserJWT = (req, res, next) => {
   }
 };
 const checkUserPermission = (req, res, next) => {
-  if (nonSecurePaths.includes(req.path)) return next();
+  if (nonSecurePaths.includes(req.path) || req.path === "/account")
+    return next();
 
   if (req.user) {
     let email = req.user.email;
@@ -68,8 +85,7 @@ const checkUserPermission = (req, res, next) => {
         EM: `You don't have permission to access this resource...`,
       });
     }
-  } else;
-  {
+  } else {
     return res.status(401).json({
       EC: -1,
       DT: "",
